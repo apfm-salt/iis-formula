@@ -11,6 +11,6 @@ install_dotnet_4.7_requirements:
 
 # Install trough repo-ng
 dotnet47:
-  pkg.installed: []
+  pkg.installed:
     - require:
       - wua: install_dotnet_4.7_requirements
