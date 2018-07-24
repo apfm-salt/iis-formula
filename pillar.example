@@ -1,0 +1,7 @@
+# IIS configuration
+iis:
+  vhosts:
+    example.com:
+      password: 'totallysecret'
+    example.net:
+      password: 'totallysecret'
