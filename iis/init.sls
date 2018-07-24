@@ -1,5 +1,5 @@
 # Install IIS
 include:
   - iis.install
-  - iis.dotnet
+  - iis.dotnetfx
   - iis.vhosts

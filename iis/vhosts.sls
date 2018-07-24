@@ -42,6 +42,6 @@ main_webroot:
         processModel.identityType: SpecificUser
     - require:
       - win_servermanager: IIS_Webserver
-      - pkg: dotnet47
+      - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 {%- endfor %}
