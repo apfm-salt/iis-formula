@@ -22,6 +22,14 @@ main_webroot:
     - createhome: True
     - win_description: 'Web user for {{ vhost }}'
 
+# Create Webroot (createHome: True doesn't appear to be doing this)
+{{ vhost }}_webroot:
+  file.directory:
+    - name: {{ vhost_webroot }}
+    - user: {{ username }}
+    - require:
+      - user: {{ vhost }}_user
+
 # Create vhost & application pool
 {{ vhost }}_website:
   win_iis.deployed:
@@ -33,7 +41,7 @@ main_webroot:
     - port: 80
     - require:
       - win_servermanager: IIS_Webserver
-      - user: {{ vhost }}_user
+      - file: {{ vhost }}_webroot
 
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
