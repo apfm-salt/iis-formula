@@ -7,3 +7,7 @@ iis:
       password: 'totallysecret'
     example.net:
       password: 'totallysecret'
+#placeholder:
+#  install: True
+#  template: 'salt://iis/templates/placeholder.html.jinja'
+#  template_type: jinja
