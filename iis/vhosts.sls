@@ -7,8 +7,7 @@ main_webroot:
 
 {%- for vhost, data in salt['pillar.get']('iis:vhosts').iteritems() %}
 {%- set vhost_webroot = webroot ~ '\\' ~ vhost %}
-{%- set domain_safe = vhost|lower|replace('.','_') %}
-{%- set username = domain_safe|replace('.','_')|replace('www_','') %}
+{%- set username = vhost|lower|replace('.','_')|replace('-','_')|replace('www_','') %}
 {%- set username = username[:20] %}
 {%- if username[-1] == '_' %}
 {%- set username = username[:-1] %}
