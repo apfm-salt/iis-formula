@@ -7,11 +7,14 @@ main_webroot:
 
 {%- for vhost, data in salt['pillar.get']('iis:vhosts').iteritems() %}
 {%- set vhost_webroot = webroot ~ '\\' ~ vhost %}
-{%- set domain_safe = vhost|replace('.','_')|replace('-','_') %}
+{%- set domain_safe = vhost|lower|replace('.','_') %}
+{%- set username = domain_safe|replace('.','_')|replace('www_','') %}
+{%- set username = username[:20] %}
+
 # Create user
 {{ vhost }}_user:
   user.present:
-    - name: {{ domain_safe }}
+    - name: {{ username }}
     - password: {{ data.password }}
     - home: {{ vhost_webroot }}
     - createhome: True
@@ -37,7 +40,7 @@ main_webroot:
     - settings:
         managedPipelineMode: {{ data.pipelinemode if 'pipelinemode' in data else 'Integrated' }}
         processModel.maxProcesses: {{ data.processes if 'processes' in data else 5 }}
-        processModel.userName: {{ domain_safe }}
+        processModel.userName: {{ username }}
         processModel.password: {{ data.password }}
         processModel.identityType: SpecificUser
     - require:
