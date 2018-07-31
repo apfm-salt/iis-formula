@@ -10,6 +10,9 @@ main_webroot:
 {%- set domain_safe = vhost|lower|replace('.','_') %}
 {%- set username = domain_safe|replace('.','_')|replace('www_','') %}
 {%- set username = username[:20] %}
+{%- if username[-1] == '_' %}
+{%- set username = username[:-1] %}
+{%- endif %}
 
 # Create user
 {{ vhost }}_user:
