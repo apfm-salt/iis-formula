@@ -37,11 +37,23 @@ main_webroot:
     - sourcepath: {{ vhost_webroot }}
     - apppool: {{ vhost }}
     - hostheader: {{ vhost }}
-    - ipaddress: '*'
-    - port: 80
+    - ipaddress: "{{ data.ip if 'ip' in data else '*' }}"
+    - port: {{ data.port if 'port' in data else '80' }}
+    - preload: {{ data.preload if 'preload' in data else 'False' }}
     - require:
       - win_servermanager: IIS_Webserver
       - file: {{ vhost }}_webroot
+
+{{ vhost }}_site_settings:
+  win_iis.container_setting:
+    - name: {{ vhost }}
+    - container: Sites
+    - settings:
+        applicationDefaults.preloadEnabled: {{ data.preload if 'preload' in data else 'False' }}
+    - require:
+      - win_servermanager: IIS_Webserver
+      - chocolatey: dotnetfx
+      - win_iis: {{ vhost }}_website
 
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
@@ -53,6 +65,7 @@ main_webroot:
         processModel.userName: {{ username }}
         processModel.password: {{ data.password }}
         processModel.identityType: SpecificUser
+        startMode: {{ data.startmode if 'startmode' in data else 'OnDemand' }}
     - require:
       - win_servermanager: IIS_Webserver
       - chocolatey: dotnetfx
