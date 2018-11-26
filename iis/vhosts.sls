@@ -61,7 +61,7 @@ main_webroot:
     - container: AppPools
     - settings:
         managedPipelineMode: {{ data.pipelinemode if 'pipelinemode' in data else 'Integrated' }}
-        processModel.maxProcesses: {{ data.processes if 'processes' in data else 5 }}
+        processModel.maxProcesses: {{ data.processes if 'processes' in data else 1 }}
         processModel.userName: {{ username }}
         processModel.password: {{ data.password }}
         processModel.identityType: SpecificUser
