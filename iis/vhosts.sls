@@ -5,7 +5,7 @@ main_webroot:
     - name: {{ webroot }}
     - user: Administrator
 
-{%- for vhost, data in salt['pillar.get']('iis:vhosts').iteritems() %}
+{%- for vhost, data in salt['pillar.get']('iis:vhosts').items() %}
 {%- set vhost_webroot = webroot ~ '\\' ~ vhost %}
 {%- set username = vhost|lower|replace('.','_')|replace('-','_')|replace('www_','') %}
 {%- set username = username[:20] %}
@@ -39,7 +39,6 @@ main_webroot:
     - hostheader: {{ vhost }}
     - ipaddress: "{{ data.ip if 'ip' in data else '*' }}"
     - port: {{ data.port if 'port' in data else '80' }}
-    - preload: {{ data.preload if 'preload' in data else 'False' }}
     - require:
       - win_servermanager: IIS_Webserver
       - file: {{ vhost }}_webroot
