@@ -67,6 +67,5 @@ main_webroot:
         startMode: {{ data.startmode if 'startmode' in data else 'OnDemand' }}
     - require:
       - win_servermanager: IIS_Webserver
-      - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 {%- endfor %}
