@@ -71,4 +71,18 @@ main_webroot:
       - win_servermanager: IIS_Webserver
       - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
+
+{%- for vdir, vdir_data in salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs', {}) %}
+{%- set vdir_id = vdir|lower|replace('.','_')|replace('-','_')|replace('/','') %}
+{{ vhost }}_vdir_{{ vdir_id }}:
+  win_iis.create_vdir:
+    - name: {{ vdir }}
+{%- if 'site' not in vdir_data -%}
+    - site: {{ vhost_apppool }}
+{%- else -%}
+    - site: {{ vdir_data.site }}
+{%- endif -%}
+    - source: {{ vdir_data.path }}
+{%- endfor %}
+
 {%- endfor %}
