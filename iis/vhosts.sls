@@ -51,7 +51,6 @@ main_webroot:
         applicationDefaults.preloadEnabled: {{ data.preload if 'preload' in data else 'False' }}
     - require:
       - win_servermanager: IIS_Webserver
-      - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 
 {{ vhost }}_apppool_setting:
@@ -67,6 +66,5 @@ main_webroot:
         startMode: {{ data.startmode if 'startmode' in data else 'OnDemand' }}
     - require:
       - win_servermanager: IIS_Webserver
-      - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 {%- endfor %}

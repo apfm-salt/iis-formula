@@ -1,7 +1,5 @@
 # IIS configuration
 iis:
-  dotnetfx:
-    version: 4.7.2
   vhosts:
     example.com:
       password: 'totallysecret'
