@@ -86,7 +86,6 @@ main_webroot:
         startMode: {{ vhost_data.startmode if 'startmode' in vhost_data else 'OnDemand' }}
     - require:
       - win_servermanager: IIS_Webserver
-      - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 
 {%- for vdir,vdir_data in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs', {}).items() %}
