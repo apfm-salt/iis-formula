@@ -47,8 +47,6 @@ main_webroot:
   win_iis.container_setting:
     - name: {{ vhost }}
     - container: Sites
-    - settings:
-        applicationDefaults.preloadEnabled: {{ data.preload if 'preload' in data else 'False' }}
     - require:
       - win_servermanager: IIS_Webserver
       - chocolatey: dotnetfx
