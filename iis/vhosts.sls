@@ -2,8 +2,8 @@
 {%- set webroot = salt['pillar.get']('iis:webroot', 'c:\inetpub\sites') %}
 main_webroot:
   file.directory:
-    - name: {{ webroot }}
-    - user: Administrator
+    - name: '{{ webroot }}\'
+    - user: 'Administrator'
 
 {%- for vhost, data in salt['pillar.get']('iis:vhosts').items() %}
 {%- set vhost_webroot = webroot ~ '\\' ~ vhost %}
