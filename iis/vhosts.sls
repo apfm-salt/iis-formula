@@ -35,8 +35,8 @@ main_webroot:
 {%- if 'source' in vhost_data %}
 {{ vhost }}_archive:
   archive.extracted:
-    - name: "{{ vhost_webroot }}"
-    - source: "{{ vhost_data.source }}"
+    - name: {{ vhost_webroot }}
+    - source: {{ vhost_data.source }}
 {%- endif %}
 
 # Create vhost & application pool
@@ -94,8 +94,8 @@ main_webroot:
 {%- if 'source' in vdir_data %}
 {{ vhost }}_{{ vdir_id }}_archive:
   archive.extracted:
-    - name: "{{ vdir_data.path }}"
-    - source: "{{ vdir_data.source }}"
+    - name: {{ vdir_data.path }}
+    - source: {{ vdir_data.source }}
 {%- endif %}
 {%- endfor %}
 
