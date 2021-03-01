@@ -32,6 +32,13 @@ main_webroot:
     - require:
       - user: {{ vhost }}_user
 
+{%- if 'source' in vhost_data %}
+{{ vhost }}_archive:
+  archive.extracted:
+    - name: "{{ vhost_webroot }}"
+    - source: "{{ vhost_data.source }}"
+{%- endif %}
+
 # Create vhost & application pool
 {{ vhost }}_website:
   win_iis.deployed:
