@@ -83,6 +83,13 @@ main_webroot:
     - site: {{ vdir_data.site }}
 {%- endif -%}
     - source: {{ vdir_data.path }}
+
+{%- if 'source' in vdir_data %}
+{{ vhost }}_{{ vdir_id }}_archive:
+  archive.extracted:
+    - name: "{{ vdir_data.path }}"
+    - source: "{{ vdir_data.source }}"
+{%- endif %}
 {%- endfor %}
 
 {%- endfor %}
