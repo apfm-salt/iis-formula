@@ -9,6 +9,8 @@ main_webroot:
 {%- set vhost_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':site', vhost ) %}
 {%- set vhost_apppool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apppool', vhost_site ) %}
 {%- set vhost_webroot = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':webroot', webroot ~ '\\' ~ vhost_apppool ) %}
+{%- set vhost_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':hash', '') %}
+{%- set vhost_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':skip_verify', True) %}
 {%- set vhost_username = vhost_site|lower|replace('.','_')|replace('-','_')|replace('www_','') %}
 {%- set vhost_username = vhost_username[:20] %}
 {%- if vhost_username[-1] == '_' %}
@@ -37,6 +39,10 @@ main_webroot:
   archive.extracted:
     - name: {{ vhost_webroot }}
     - source: {{ vhost_data.source }}
+    - skip_verify: {{ vhost_skip_verify }}
+{%- if vhost_hash != '' %}
+    - hash: {{ vhost_hash }}
+{%- endif %}
 {%- endif %}
 
 # Create vhost & application pool
@@ -81,6 +87,8 @@ main_webroot:
 
 {%- for vdir, vdir_data in salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs', {}) %}
 {%- set vdir_id = vdir|lower|replace('.','_')|replace('-','_')|replace('/','') %}
+{%- set vdir_hash = salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':hash', '') %}
+{%- set vdir_skip_verify = salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':verify', True) %}
 {{ vhost }}_vdir_{{ vdir_id }}:
   win_iis.create_vdir:
     - name: {{ vdir }}
@@ -96,6 +104,10 @@ main_webroot:
   archive.extracted:
     - name: {{ vdir_data.path }}
     - source: {{ vdir_data.source }}
+    - skip_verify: {{ vdir_skip_verify }}
+{%- if vdir_hash != '' %}
+    - hash: {{ vdir_hash }}
+{%- endif %}
 {%- endif %}
 {%- endfor %}
 
