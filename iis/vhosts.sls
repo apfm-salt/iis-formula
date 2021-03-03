@@ -39,6 +39,7 @@ main_webroot:
   archive.extracted:
     - name: {{ vhost_webroot }}
     - source: {{ vhost_data.source }}
+    - enforce_toplevel: False
     - skip_verify: {{ vhost_skip_verify }}
 {%- if vhost_hash != '' %}
     - hash: {{ vhost_hash }}
@@ -104,6 +105,7 @@ main_webroot:
   archive.extracted:
     - name: {{ vdir_data.path }}
     - source: {{ vdir_data.source }}
+    - enforce_toplevel: False
     - skip_verify: {{ vdir_skip_verify }}
 {%- if vdir_hash != '' %}
     - hash: {{ vdir_hash }}
