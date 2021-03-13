@@ -62,17 +62,6 @@ main_webroot:
       - win_servermanager: IIS_Webserver
       - file: {{ vhost }}_webroot
 
-{{ vhost }}_site_settings:
-  win_iis.container_setting:
-    - name: {{ vhost_site }}
-    - container: Sites
-    - settings:
-        applicationDefaults.preloadEnabled: {{ vhost_data.preload if 'preload' in vhost_data else 'False' }}
-    - require:
-      - win_servermanager: IIS_Webserver
-      - chocolatey: dotnetfx
-      - win_iis: {{ vhost }}_website
-
 {%- for alt_name in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':alt_names', []) %}
 {{ alt_name }}_binding:
   win_iis.create_binding:
