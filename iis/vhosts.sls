@@ -86,19 +86,15 @@ main_webroot:
       - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 
-{%- if 'vdirs' in vhost_data.keys() %}
 {%- for vdir,vdir_data in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs', {}).items() %}
 {%- set vdir_id = vdir|lower|replace('.','_')|replace('-','_')|replace('/','') %}
 {%- set vdir_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':hash', '') %}
 {%- set vdir_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':verify', True) %}
+{%- set vdir_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':site', vhost_site) %}
 {{ vhost }}_vdir_{{ vdir_id }}:
   win_iis.create_vdir:
     - name: {{ vdir }}
-{%- if 'site' not in vdir_data -%}
-    - site: {{ vhost_apppool }}
-{%- else -%}
-    - site: {{ vdir_data.site }}
-{%- endif -%}
+    - site: {{ vdir_site }}
     - source: {{ vdir_data.path }}
 
 {%- if 'source' in vdir_data %}
@@ -113,6 +109,5 @@ main_webroot:
 {%- endif %}
 {%- endif %}
 {%- endfor %}
-{%- endif %}
 
 {%- endfor %}
