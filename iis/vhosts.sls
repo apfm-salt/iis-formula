@@ -86,10 +86,10 @@ main_webroot:
       - chocolatey: dotnetfx
       - win_iis: {{ vhost }}_website
 
-{%- for vdir, vdir_data in salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs', {}) %}
+{%- for vdir,vdir_data in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs', {}).items() %}
 {%- set vdir_id = vdir|lower|replace('.','_')|replace('-','_')|replace('/','') %}
-{%- set vdir_hash = salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':hash', '') %}
-{%- set vdir_skip_verify = salt['pillar.get']('iis:vdirs:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':verify', True) %}
+{%- set vdir_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':hash', '') %}
+{%- set vdir_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':verify', True) %}
 {{ vhost }}_vdir_{{ vdir_id }}:
   win_iis.create_vdir:
     - name: {{ vdir }}
