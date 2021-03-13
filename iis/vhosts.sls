@@ -33,6 +33,9 @@ main_webroot:
     - user: {{ vhost_username }}
     - require:
       - user: {{ vhost }}_user
+{%- if 'source' in vhost_data %}
+      - archive: {{ vhost }}_archive
+{%- endif %}
 
 {%- if 'source' in vhost_data %}
 {{ vhost }}_archive:
@@ -96,6 +99,10 @@ main_webroot:
     - name: {{ vdir }}
     - site: {{ vdir_site }}
     - sourcepath: {{ vdir_data.path }}
+{%- if 'source' in vdir_data %}
+    - require:
+      - archive: {{ vhost }}_{{ vdir_id }}_archive
+{%- endif %}
 
 {%- if 'source' in vdir_data %}
 {{ vhost }}_{{ vdir_id }}_archive:
