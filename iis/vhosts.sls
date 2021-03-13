@@ -95,7 +95,7 @@ main_webroot:
   win_iis.create_vdir:
     - name: {{ vdir }}
     - site: {{ vdir_site }}
-    - source: {{ vdir_data.path }}
+    - sourcepath: {{ vdir_data.path }}
 
 {%- if 'source' in vdir_data %}
 {{ vhost }}_{{ vdir_id }}_archive:
