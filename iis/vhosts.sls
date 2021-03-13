@@ -5,6 +5,28 @@ main_webroot:
     - name: {{ webroot }}
     - user: Administrator
 
+{%- for apppool,apppool_data in salt['pillar.get']('iis:apppools', {}).items() %}
+  {%- set apppool_username = apppool|lower|replace('.','_')|replace('-','_')|replace('www_','') %}
+  {%- set apppool_username = apppool_username[:20] %}
+  {%- if apppool_username[-1] == '_' %}
+    {%- set apppool_username = apppool_username[:-1] %}
+  {%- endif %}
+
+{{ apppool }}_apppool_setting:
+  win_iis.container_setting:
+    - name: {{ apppool }}
+    - container: AppPools
+    - settings:
+        managedPipelineMode: {{ apppool_data.pipelinemode if 'pipelinemode' in apppool_data else 'Integrated' }}
+        processModel.maxProcesses: {{ apppool_data.processes if 'processes' in apppool_data else 1 }}
+        processModel.userName: {{ apppool_username }}
+        processModel.identityType: SpecificUser
+        startMode: {{ apppool_data.startmode if 'startmode' in apppool_data else 'OnDemand' }}
+    - require:
+      - win_servermanager: IIS_Webserver
+
+{%- endfor %}
+
 {%- for vhost, vhost_data in salt['pillar.get']('iis:vhosts', {}).items() %}
 {%- set vhost_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':site', vhost ) %}
 {%- set vhost_apppool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apppool', vhost_site ) %}
