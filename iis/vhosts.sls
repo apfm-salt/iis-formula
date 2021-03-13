@@ -21,7 +21,7 @@ main_webroot:
 {{ vhost }}_user:
   user.present:
     - name: {{ vhost_username }}
-    - password: {{ vhost_data.password }}
+    {# - password: {{ vhost_data.password }} -#}
     - home: {{ vhost_webroot }}
     - createhome: True
     - win_description: 'Web user for {{ vhost }}'
@@ -84,7 +84,7 @@ main_webroot:
         managedPipelineMode: {{ vhost_data.pipelinemode if 'pipelinemode' in vhost_data else 'Integrated' }}
         processModel.maxProcesses: {{ vhost_data.processes if 'processes' in vhost_data else 1 }}
         processModel.userName: {{ vhost_username }}
-        processModel.password: {{ vhost_data.password }}
+        {# processModel.password: {{ vhost_data.password }} -#}
         processModel.identityType: SpecificUser
         startMode: {{ vhost_data.startmode if 'startmode' in vhost_data else 'OnDemand' }}
     - require:
