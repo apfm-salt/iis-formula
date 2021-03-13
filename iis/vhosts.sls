@@ -94,10 +94,12 @@ main_webroot:
 {%- set vdir_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':hash', '') %}
 {%- set vdir_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':verify', True) %}
 {%- set vdir_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':site', vhost_site) %}
+{%- set vdir_app = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':vdirs:' ~ vdir ~ ':app', vhost_apppool) %}
 {{ vhost }}_vdir_{{ vdir_id }}:
   win_iis.create_vdir:
     - name: {{ vdir }}
     - site: {{ vdir_site }}
+    - app: {{ vdir_app }}
     - sourcepath: {{ vdir_data.path }}
 {%- if 'source' in vdir_data %}
     - require:
