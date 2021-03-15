@@ -38,6 +38,7 @@ main_webroot:
     {%- endif %}
   {%- endif %}
 
+  {%- if not salt['system.get_pending_reboot']() %}
 # Create vhost & application pool
 {{ vhost }}_website:
   win_iis.deployed:
@@ -50,7 +51,9 @@ main_webroot:
     - require:
       - win_servermanager: IIS_Webserver
       - file: {{ vhost }}_webroot
+  {%- endif %}
 
+  {%- if not salt['system.get_pending_reboot']() %}
 {{ vhost }}_site_settings:
   win_iis.container_setting:
     - name: {{ vhost_site }}
@@ -58,7 +61,9 @@ main_webroot:
     - require:
       - win_servermanager: IIS_Webserver
       - win_iis: {{ vhost }}_website
+  {%- endif %}
 
+  {%- if not salt['system.get_pending_reboot']() %}
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
     - name: {{ vhost_apppool }}
@@ -70,4 +75,5 @@ main_webroot:
     - require:
       - win_servermanager: IIS_Webserver
       - win_iis: {{ vhost }}_website
+  {%- endif %}
 {%- endfor %}
