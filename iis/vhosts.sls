@@ -1,9 +1,13 @@
 ### Deal with IIS vhosts
 {%- set webroot = salt['pillar.get']('iis:webroot', 'c:\inetpub\sites') %}
+{%- set webdrive = webroot|regex_replace('^([A-Z]:\\\)', '\1') %}
+
+{%- if webdrive != webroot %}
 main_webroot:
   file.directory:
-    - name: {{ webroot }}
-    - user: Administrator
+    - name: '{{ webroot }}\'
+    - user: 'Administrator'
+{%- endif %}
 
 {%- for vhost, data in salt['pillar.get']('iis:vhosts').items() %}
 {%- set vhost_webroot = webroot ~ '\\' ~ vhost %}
