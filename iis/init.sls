@@ -4,4 +4,5 @@ include:
   - iis.conf
   - iis.apppools
   - iis.vhosts
+  - iis.apps
   - iis.bindings
