@@ -5,4 +5,5 @@ urlrewrite:
     - name: urlrewrite
     - require:
       - win_servermanager: IIS_Webserver
+      - module: chocolatey.bootstrap
 {% endif %}

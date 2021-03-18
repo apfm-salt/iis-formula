@@ -26,3 +26,9 @@ IIS_WebServer_Installed:
       - system: IIS_WebServer_Reboot
     - order: last
 {%- endif %}
+
+chocolatey.bootstrap:
+  module.run:
+    - chocolatey.bootstrap:
+      - force: False
+    - unless: "where.exe chocolatey"
