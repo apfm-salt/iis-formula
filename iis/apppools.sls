@@ -1,4 +1,4 @@
-{%- if not salt['system.get_pending_reboot']() %}
+{%- if grains.get('IIS_WebServer_Install') == 'complete' %}
   {%- for apppool in salt['pillar.get']('iis:apppools', []) %}
 {{ apppool }}_apppool:
   win_iis.create_apppool:

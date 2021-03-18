@@ -1,4 +1,4 @@
-{%- if not salt['system.get_pending_reboot']() %}
+{%- if grains.get('IIS_WebServer_Install') == 'complete' %}
   {%- for vhost,vhost_data in salt['pillar.get']('iis:vhosts', {}).items() %}
     {%- set vhost_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':site', vhost ) %}
     {%- for alt_name in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':alt_names', []) %}
