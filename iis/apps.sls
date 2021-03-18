@@ -9,20 +9,6 @@
     {%- set app_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':site', vhost_site) %}
     {%- set app_pool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':pool', vhost_apppool) %}
 
-    {%- if not salt['system.get_pending_reboot']() %}
-{{ vhost }}_app_{{ app_id }}:
-  win_iis.create_app:
-    - name: {{ app_name }}
-    - site: {{ app_site }}
-    - apppool: {{ app_pool }}
-    - sourcepath: {{ app_data.path }}
-      {%- if 'source' in app_data %}
-    - require:
-      - win_servermanager: IIS_Webserver
-      - archive: {{ vhost }}_{{ app_id }}_archive
-      {%- endif %}
-    {%- endif %}
-
     {%- if 'source' in app_data %}
 {{ vhost }}_{{ app_id }}_archive:
   archive.extracted:
@@ -34,5 +20,20 @@
     - hash: {{ app_hash }}
       {%- endif %}
     {%- endif %}
+
+    {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
+{{ vhost }}_app_{{ app_id }}:
+  win_iis.create_app:
+    - name: {{ app_name }}
+    - site: {{ app_site }}
+    - apppool: {{ app_pool }}
+    - sourcepath: {{ app_data.path }}
+    - require:
+      - win_servermanager: IIS_Webserver
+      {%- if 'source' in app_data %}
+      - archive: {{ vhost }}_{{ app_id }}_archive
+      {%- endif %}
+    {%- endif %}
+
   {%- endfor %}
 {%- endfor %}

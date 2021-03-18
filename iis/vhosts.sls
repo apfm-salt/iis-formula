@@ -38,7 +38,7 @@ main_webroot:
     {%- endif %}
   {%- endif %}
 
-  {%- if not salt['system.get_pending_reboot']() %}
+  {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 # Create vhost & application pool
 {{ vhost }}_website:
   win_iis.deployed:
@@ -53,7 +53,7 @@ main_webroot:
       - file: {{ vhost }}_webroot
   {%- endif %}
 
-  {%- if not salt['system.get_pending_reboot']() %}
+  {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 {{ vhost }}_site_settings:
   win_iis.container_setting:
     - name: {{ vhost_site }}
@@ -63,7 +63,7 @@ main_webroot:
       - win_iis: {{ vhost }}_website
   {%- endif %}
 
-  {%- if not salt['system.get_pending_reboot']() %}
+  {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
     - name: {{ vhost_apppool }}
