@@ -1,8 +1,10 @@
+{% from "iis/map.jinja" import iis_settings with context %}
+
 # Install placeholder in default vhost
-{%- if salt['pillar.get']('iis:placeholder:install', True) %}
+{%- if iis_settings.placeholder.install %}
 install_placeholder:
   file.managed:
-    - name: 'C:\inetpub\wwwroot\iisstart.htm'
-    - source: {{ salt['pillar.get']('iis:placeholder:template', 'salt://iis/templates/placeholder.html.jinja') }}
-    - template: {{ salt['pillar.get']('iis:placeholder:template_type', 'jinja') }}
+    - name: {{ iis_settings.webroot ~ '\iisstart.htm' }}
+    - source: {{ iis_settings.placeholder.template }}
+    - template: {{ iis_settings.placeholder.type }}
 {%- endif %}

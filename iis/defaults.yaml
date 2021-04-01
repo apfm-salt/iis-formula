@@ -1,0 +1,9 @@
+iis:
+  webroot: 'c:\inetpub\sites'
+  verify: True
+  placeholder:
+    install: True
+    template: 'salt://iis/templates/placeholder.html.jinja'
+    type: 'jinja'
+  apppools: []
+  vhosts: {}

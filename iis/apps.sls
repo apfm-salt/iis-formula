@@ -1,37 +1,31 @@
-{%- for vhost,vhost_data in salt['pillar.get']('iis:vhosts', {}).items() %}
-  {%- set vhost_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':site', vhost ) %}
-  {%- set vhost_apppool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apppool', vhost_site ) %}
-  {%- for app,app_data in salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps', {}).items() %}
-    {%- set app_id = app|replace('.','_')|replace('-','_')|regex_replace('^/','')|regex_replace('/$','')|replace('/','_') %}
-    {%- set app_name = app|regex_replace('^/','')|regex_replace('/$','') %}
-    {%- set app_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':hash', '') %}
-    {%- set app_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':verify', True) %}
-    {%- set app_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':site', vhost_site) %}
-    {%- set app_pool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apps:' ~ app ~ ':pool', vhost_apppool) %}
+{%- from "iis/map.jinja" import iis_settings with context %}
+
+{%- for vhost,vhost_data in iis_settings['vhosts'].items() %}
+  {%- for app,app_data in vhost_data['apps'].items() %}
 
     {%- if 'source' in app_data %}
-{{ vhost }}_{{ app_id }}_archive:
+{{ vhost }}_{{ app_data.id }}_archive:
   archive.extracted:
     - name: {{ app_data.path }}
     - source: {{ app_data.source }}
     - enforce_toplevel: False
-    - skip_verify: {{ app_skip_verify }}
-      {%- if app_hash != '' %}
-    - hash: {{ app_hash }}
+    - skip_verify: {{ app_data.verify }}
+        {%- if app_data.hash != '' %}
+    - hash: {{ app_data.hash }}
+        {%- endif %}
       {%- endif %}
-    {%- endif %}
 
     {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
-{{ vhost }}_app_{{ app_id }}:
+{{ vhost }}_app_{{ app_data.id }}:
   win_iis.create_app:
-    - name: {{ app_name }}
-    - site: {{ app_site }}
-    - apppool: {{ app_pool }}
+    - name: {{ app_data.name }}
+    - site: {{ app_data.site }}
+    - apppool: {{ app_data.pool }}
     - sourcepath: {{ app_data.path }}
     - require:
       - win_servermanager: IIS_Webserver
       {%- if 'source' in app_data %}
-      - archive: {{ vhost }}_{{ app_id }}_archive
+      - archive: {{ vhost }}_{{ app_data.id }}_archive
       {%- endif %}
     {%- endif %}
 
