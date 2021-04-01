@@ -1,5 +1,7 @@
+{% from "iis/map.jinja" import iis_settings with context %}
+
 {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
-  {%- for apppool in salt['pillar.get']('iis:apppools', []) %}
+  {%- for apppool in iis_settings['apppools'] %}
 {{ apppool }}_apppool:
   win_iis.create_apppool:
     - name: {{ apppool }}

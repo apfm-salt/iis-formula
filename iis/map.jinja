@@ -1,0 +1,84 @@
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+{# Attempt to restrict pillar.get calls to the map.jinja such that we can
+   improve pillar performance on the master.  Generally heavy pillar usage has a
+   large impact on the CPU/Memory load of a SaltMaster, and it has an even worse
+   impact on time spent processing git pillar data. #}
+
+{%- import_yaml 'iis/defaults.yaml' as defaults %}
+
+{# Allow custom imports to reduce pillar load on the master #}
+{%- set import_file = salt['pillar.get']('iis:defaults', '') %}
+{%- if import_file != '' %}
+  {%- set import_type = import_file|lower|regex_match('.*\.(json|ya?ml)$') %}
+  {%- if import_type in ['json'] %}
+    {%- import_json iis_defaults as custom_defaults %}
+  {%- elif import_type in ['yml', 'yaml'] %}
+    {%- import_yaml iis_defaults as custom_defaults %}
+  {%- else %}
+    {%- set custom_defaults = {} %}
+  {%- endif %}
+  {%- do salt['defaults.merge'](defaults, custom_defaults) %}
+{%- endif %}
+
+{# While we try to encourage usage of custom defaults within the state tree, we
+   want to be flexible enough to support pillar overrides f r any setting #}
+{%- set iis_settings = salt['pillar.get']('iis', defaults['iis'], merge=True) %}
+
+{# cleanup out data structures so that we have filled in all possible default
+   values. #}
+{%- for vhost,vhost_data in iis_settings['vhosts'].items() %}
+
+  {%- if 'site' not in vhost_data %}
+    {%- do vhost_data.update({ 'site': vhost }) %}
+  {%- endif %}
+
+  {%- if 'apppool' not in vhost_data %}
+    {%- do vhost_data.update({ 'apppool': vhost_data.site }) %}
+  {%- endif %}
+
+  {%- if 'webroot' not in vhost_data %}
+    {%- do vhost_data.update({ 'webroot': iis_settings.webroot ~ '\\' ~ vhost_data.apppool }) %}
+  {%- endif %}
+
+  {%- if 'hash' not in vhost_data %}
+    {%- do vhost_data.update({ 'hash': ''}) %}
+  {%- endif %}
+
+  {%- if 'verify' not in vhost_data %}
+    {%- do vhost_data.update({ 'verify':  iis_settings.verify }) %}
+  {%- endif %}
+
+  {%- if 'alt_names' not in vhost_data %}
+    {%- do vhost_data.update({ 'alt_names': [] }) %}
+  {%- endif %}
+
+  {%- if 'apps' not in vhost_data %}
+    {%- do vhost_data.update({ 'apps': {} }) %}
+  {%- endif %}
+
+  {%- for app,app_data in vhost_data['apps'].items() %}
+    {%- do app_data.update({ 'id': app|replace('.','_')|replace('-','_')|regex_replace('^/','')|regex_replace('/$','')|replace('/','_') }) %}
+    {%- do app_data.update({ 'name': app|regex_replace('^/','')|regex_replace('/$','') }) %}
+
+    {%- if 'hash' not in app_data %}
+      {%- do app_data.update({ 'hash': ''}) %}
+    {%- endif %}
+
+    {%- if 'verify' not in app_data %}
+      {%- do app_data.update({ 'verify':  iis_settings.verify }) %}
+    {%- endif %}
+
+    {%- if 'site' not in app_data %}
+      {%- do app_data.update({ 'site': vhost_data.site }) %}
+    {%- endif %}
+
+    {%- if 'pool' not in app_data %}
+      {%- do app_data.update({ 'pool': vhost_data.apppool }) %}
+    {%- endif %}
+
+    {%- do vhost_data['apps'].update({ app: app_data }) %}
+  {%- endfor %}
+
+  {%- do iis_settings['vhosts'].update({ vhost: vhost_data }) %}
+{%- endfor %}

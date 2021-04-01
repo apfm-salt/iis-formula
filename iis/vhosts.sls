@@ -1,26 +1,21 @@
-### Deal with IIS vhosts
-{%- set webroot = salt['pillar.get']('iis:webroot', 'c:\inetpub\sites') %}
-{%- set webdrive = webroot|regex_replace('^([A-Z]:\\\)', '\1') %}
+{% from "iis/map.jinja" import iis_settings with context %}
 
-{%- if webdrive != webroot %}
+### Deal with IIS vhosts
+{%- set webdrive = iis_settings.webroot|regex_replace('^([A-Z]:\\\)', '\1') %}
+
+{%- if webdrive != iis_settings.webroot %}
 main_webroot:
   file.directory:
-    - name: '{{ webroot }}\'
+    - name: '{{ iis_settings.webroot }}'
     - user: 'Administrator'
 {%- endif %}
 
-{%- for vhost,vhost_data in salt['pillar.get']('iis:vhosts', {}).items() %}
-  {%- set vhost_site = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':site', vhost ) %}
-  {%- set vhost_apppool = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':apppool', vhost_site ) %}
-  {%- set vhost_webroot = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':webroot', webroot ~ '\\' ~ vhost_apppool ) %}
-  {%- set vhost_hash = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':hash', '') %}
-  {%- set vhost_skip_verify = salt['pillar.get']('iis:vhosts:' ~ vhost ~ ':skip_verify', True) %}
-
+{%- for vhost,vhost_data in iis_settings['vhosts'].items() %}
 
 # Create Webroot (createHome: True doesn't appear to be doing this)
 {{ vhost }}_webroot:
   file.directory:
-    - name: {{ vhost_webroot }}
+    - name: {{ vhost_data.webroot }}
   {%- if 'source' in vhost_data %}
     - require:
       - archive: {{ vhost }}_archive
@@ -29,12 +24,12 @@ main_webroot:
   {%- if 'source' in vhost_data %}
 {{ vhost }}_archive:
   archive.extracted:
-    - name: {{ vhost_webroot }}
+    - name: {{ vhost_data.webroot }}
     - source: {{ vhost_data.source }}
     - enforce_toplevel: False
-    - skip_verify: {{ vhost_skip_verify }}
-    {%- if vhost_hash != '' %}
-    - hash: {{ vhost_hash }}
+    - skip_verify: {{ vhost_data.verify }}
+    {%- if vhost_data.hash != '' %}
+    - hash: {{ vhost_data.hash }}
     {%- endif %}
   {%- endif %}
 
@@ -42,9 +37,9 @@ main_webroot:
 # Create vhost & application pool
 {{ vhost }}_website:
   win_iis.deployed:
-    - name: {{ vhost_site }}
-    - sourcepath: {{ vhost_webroot }}
-    - apppool: {{ vhost_apppool }}
+    - name: {{ vhost_data.site }}
+    - sourcepath: {{ vhost_data.webroot }}
+    - apppool: {{ vhost_data.apppool }}
     - hostheader: {{ vhost }}
     - ipaddress: "{{ vhost_data.ip if 'ip' in vhost_data else '*' }}"
     - port: {{ vhost_data.port if 'port' in vhost_data else '80' }}
@@ -56,7 +51,7 @@ main_webroot:
   {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 {{ vhost }}_site_settings:
   win_iis.container_setting:
-    - name: {{ vhost_site }}
+    - name: {{ vhost_data.site }}
     - container: Sites
     - require:
       - win_servermanager: IIS_Webserver
@@ -66,7 +61,7 @@ main_webroot:
   {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
-    - name: {{ vhost_apppool }}
+    - name: {{ vhost_data.apppool }}
     - container: AppPools
     - settings:
         managedPipelineMode: {{ vhost_data.pipelinemode if 'pipelinemode' in vhost_data else 'Integrated' }}
