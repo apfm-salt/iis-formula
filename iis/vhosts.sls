@@ -59,6 +59,21 @@ main_webroot:
   {%- endif %}
 
   {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
+    {%- if 'webconfig' in vhost_data %}
+{{ vhost }}_webconfig:
+  win_iis.webconfiguration_settings:
+    - name: 'IIS:\Sites\{{ vhost_data.site }}'
+    - settings:
+      {%- for webconfig,webconfig_setting in vhost_data['webconfig'].items() %}
+        {{ weconfig }}: {{ webconfig_setting|tojson }}
+      {%- endfor %}
+    - require:
+      - win_servermanager: IIS_Webserver
+      - win_iis: {{ vhost }}_website
+    {%- endif %}
+  {%- endif %}
+
+  {%- if grains.get('IIS_WebServer_Install') == 'complete' %}
 {{ vhost }}_apppool_setting:
   win_iis.container_setting:
     - name: {{ vhost_data.apppool }}
