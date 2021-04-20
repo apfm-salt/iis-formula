@@ -10,13 +10,16 @@
 {# Allow custom imports to reduce pillar load on the master #}
 {%- set import_file = salt['pillar.get']('iis:defaults', '') %}
 {%- if import_file != '' %}
-  {%- set import_type = import_file|lower|regex_match('.*\.(json|ya?ml)$') %}
-  {%- if import_type in ['json'] %}
-    {%- import_json iis_defaults as custom_defaults %}
-  {%- elif import_type in ['yml', 'yaml'] %}
-    {%- import_yaml iis_defaults as custom_defaults %}
-  {%- else %}
-    {%- set custom_defaults = {} %}
+  {%- set custom_defaults = {} %}
+  {%- set import_type = import_file|lower|regex_match('.*\.(json|ya?ml|jinja)$') %}
+  {%- if import_type|length > 0 %}
+    {%- if import_type[0] in ['json'] %}
+      {%- import_json import_file as custom_defaults %}
+    {%- elif import_type[0] in ['yml', 'yaml'] %}
+      {%- import_yaml import_file as custom_defaults %}
+    {%- elif import_type[0] in ['jinja'] %}
+      {%- from import_file import iis_settings as custom_defaults %}
+    {%- endif %}
   {%- endif %}
   {%- do salt['defaults.merge'](defaults, custom_defaults) %}
 {%- endif %}
