@@ -14,6 +14,20 @@
       - win_servermanager: IIS_Webserver
       - file: {{ vhost }}_webroot
       - win_iis: {{ vhost }}_website
+{%- if 'ssl' in vhost_data and vhost_data.ssl %}
+{{ alt_name }}_ssl_binding:
+  win_iis.create_binding:
+    - name: {{ alt_name }}
+    - site: {{ vhost_data.site }}
+    - hostheader: {{ alt_name }}
+    - ipaddress: "{{ vhost_data.ip if 'ip' in vhost_data else '*' }}"
+    - port: {{ vhost_data.ssl_port if 'port' in vhost_data else '443' }}
+    - require:
+      - win_servermanager: IIS_Webserver
+      - file: {{ vhost }}_webroot
+      - win_iis: {{ vhost }}_website
+      - win_iis: {{ alt_name }}_binding
+{%- endif %}
     {%- endfor %}
   {%- endfor %}
 {%- endif %}
